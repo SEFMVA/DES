@@ -1,8 +1,6 @@
 import generator
 from bitstring import BitArray
 
-# https://bitstring.readthedocs.io/en/latest/walkthrough.html
-
 
 def f_fun(R0, key):
     order = [32, 1, 2, 3, 4, 5,
@@ -19,7 +17,21 @@ def f_fun(R0, key):
         expanded[counter] = R0[i]
         counter += 1
     xor = expanded ^ key
-    return
+    sboxes = []  # TODO
+    sboxesoutput = BitArray(32)
+    for i in range(0, 8):
+        print(i)
+        # TODO
+    P = [16, 7, 20, 21, 29, 12, 28, 17,
+         1, 15, 23, 26, 5, 18, 31, 10,
+         2, 8, 24, 14, 32, 27, 3, 9,
+         19, 13, 30, 6, 22, 11, 4, 25]
+    result = BitArray(32)
+    counter = 0
+    for i in P:
+        result[counter] = sboxesoutput[i]
+        counter += 1
+    return result
 
 
 def feistel(byteArray64, key48):
@@ -66,6 +78,67 @@ def final_permutation(z):
     return result
 
 
+def generate_keys(key64):
+
+    def PC_1(key64):
+        order = [57, 49, 41, 33, 25, 17, 9, 1,
+                 58, 50, 42, 34, 26, 18, 10, 2,
+                 59, 51, 43, 35, 27, 19, 11, 3,
+                 60, 52, 44, 36, 63, 55, 47, 39,
+                 31, 23, 15, 7, 62, 54, 46, 38,
+                 30, 22, 14, 6, 61, 53, 45, 37,
+                 29, 21, 13, 5, 28, 20, 12, 4]
+        result = BitArray(56)
+        counter = 0
+        for i in order:
+            result[counter] = key64[i]
+            counter += 1
+        return result
+
+    def PC_2(key56):
+        order = [14, 17, 11, 24, 1, 5, 3, 28,
+                 15, 6, 21, 10, 23, 19, 12, 4,
+                 26, 8, 16, 7, 27, 20, 13, 2,
+                 41, 52, 31, 37, 47, 55, 30, 40,
+                 51, 45, 33, 48, 44, 49, 39, 56,
+                 34, 53, 46, 42, 50, 36, 29, 32]
+        result = BitArray(48)
+        counter = 0
+        for i in order:
+            result[counter] = key56[i]
+            counter += 1
+        return result
+
+    def process_key(key56):
+        C = key56[0:28]
+        D = key56[28:56]
+        result = BitArray(56)
+        for i in range(1, 17):
+            if(i == 1 or i == 2 or i == 9 or i == 16):
+                firstbitC = C[0]
+                firstbitD = D[0]
+                C = C << 1
+                D = D << 1
+                C[27] = firstbitC
+                D[27] = firstbitD
+            else:
+                firstbitC = C[0:2]
+                firstbitD = D[0:2]
+                C = C << 2
+                D = D << 2
+                C[26:28] = firstbitC
+                D[26:28] = firstbitD
+            result[0:28] = C
+            result[28:56] = D
+            yield result
+
+    keygenerator = process_key(PC_1(key64))
+    result = []
+    for i in range(0, 16):
+        result.append(PC_2(keygenerator.__next__()))
+    return result
+
+
 if __name__ == "__main__":
     number_generator = generator.create_generator()
     # number_generator.__next__()
@@ -74,9 +147,12 @@ if __name__ == "__main__":
     key = BitArray(64)
     if action == '1':
         def encrypt(plaintextbytes, key):
+            keys = generate_keys(key)
+            result = initial_permutation(plaintextbytes)
             for i in range(0, 16):
-                print(i)
-            return
+                result = feistel(result, keys[i])
+            result = final_permutation(result)
+            return result
         encryptedtext = ''
         print('tekst do zaszyfrowania (UTF-8):')
         plaintext = input()
