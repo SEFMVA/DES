@@ -209,9 +209,8 @@ if __name__ == "__main__":
         encryptedtext = ''
         print('tekst do zaszyfrowania (UTF-8):')
         plaintext = input()
-        high = number_generator.__next__() << 32
-        low = number_generator.__next__()
-        key.int = high+low
+        key[0:32] = number_generator.__next__()
+        key[32:64] = number_generator.__next__()
         counter = 0
         plaintextbytes = BitArray(64)
         for i in plaintext:
@@ -243,13 +242,13 @@ if __name__ == "__main__":
             key = BitArray(64)
             keystr = input()
             key.uint = int(keystr)
-            print('tekst do odszyfrowania (UTF-8):')
+            print('tekst do odszyfrowania:')
             encryptedtext = input()
             counter = 0
             encryptedtextbytes = BitArray(64)
             for i in encryptedtext:
                 charcode = ord(i)
-                encryptedtextbytes.int = charcode << ((7-counter)*8)
+                encryptedtextbytes.uint = charcode << ((7-counter)*8)
                 counter += 1
                 if(counter == 8):
                     decryptedtext += decrypt(encryptedtextbytes, key)

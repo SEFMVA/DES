@@ -26,7 +26,7 @@ def create_generator():
     while True:
         try:
             xorbytearray = generator.__next__()
-            yield xorbytearray.int
+            yield xorbytearray
         except StopIteration:
             generator = create_iterator()
     print("finito")
