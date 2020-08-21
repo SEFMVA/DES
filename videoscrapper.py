@@ -5,5 +5,11 @@ def get_image():
     camera = cv2.VideoCapture(0)
     for i in range(2):
         return_value, image = camera.read()
-        cv2.imwrite('tests/img' + str(i) + '.png', image)
+        try:
+            cv2.imwrite('tests/img' + str(i) + '.png', image)
+        except:
+            print("Błąd komery")
+            del camera
+            return False
     del camera
+    return True

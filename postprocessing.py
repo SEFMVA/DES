@@ -40,6 +40,6 @@ def postprocess(z, lattice, init_r):
         for i in range(lattice):
             bs = BitStream(
                 float=x[i][math.floor((lattice / 2) - 1)], length=64)
-            xor = BitStream(a ^ b for (a, b) in zip(bs[0: 32], bs[32:]))
+            xor = bs[0:32] ^ bs[32:64]
             yield xor
         j = j + lattice
