@@ -233,10 +233,10 @@ if __name__ == "__main__":
         if action == '2':
             def decrypt(encryptedtextbytes, key):
                 keys = generate_keys(key)
-                result = initial_permutation(encryptedtextbytes)
+                result = final_permutation(encryptedtextbytes)
                 for i in range(0, 16):
                     result = feistel(result, keys[15-i])
-                result = final_permutation(result)
+                result = initial_permutation(result)
                 resultstring = ''
                 for i in range(0, 8):
                     resultstring += chr(result[i*8:(i*8)+8].uint)
@@ -249,6 +249,9 @@ if __name__ == "__main__":
             encryptedtext = lines[1]
             counter = 0
             encryptedtextbytes = BitArray(encryptedtext)
-            print(encryptedtextbytes)
+            print(encryptedtextbytes.length)
+            for i in range(0, int(encryptedtextbytes.length/64)):
+                fragment64 = encryptedtextbytes[i*64:((i*64)+64)]
+                decryptedtext += decrypt(fragment64, key)
             print("odszyfrowany tekst:")
             print(decryptedtext)
