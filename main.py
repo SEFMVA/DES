@@ -198,13 +198,20 @@ if __name__ == "__main__":
         def encrypt(plaintextbytes, key):
             keys = generate_keys(key)
             result = initial_permutation(plaintextbytes)
+            # result = plaintextbytes
             for i in range(0, 16):
                 result = feistel(result, keys[i])
             result = final_permutation(result)
             return result
         encryptedtext = BitArray()
-        print('tekst do zaszyfrowania (UTF-8):')
-        plaintext = input()  # TODO file
+        plaintext = ''
+        try:
+            f = open("plaintext.txt", "r")
+            lines = f.readlines()
+            plaintext = "".join(lines)
+        except:
+            print('tekst do zaszyfrowania (UTF-8):')
+            plaintext = input()
         key[0:32] = number_generator.__next__()
         key[32:64] = number_generator.__next__()
         counter = 0
@@ -212,6 +219,7 @@ if __name__ == "__main__":
         for i in plaintext:
             charcode = ord(i)
             plaintextbytes.uint += (charcode << ((7-counter)*8))
+            # print(plaintextbytes.bin)
             counter += 1
             if(counter == 8):
                 encryptedtext.append(encrypt(plaintextbytes, key))
@@ -234,6 +242,7 @@ if __name__ == "__main__":
             def decrypt(encryptedtextbytes, key):
                 keys = generate_keys(key)
                 result = final_permutation(encryptedtextbytes)
+                # result = encryptedtextbytes
                 for i in range(0, 16):
                     result = feistel(result, keys[15-i])
                 result = initial_permutation(result)
@@ -249,9 +258,9 @@ if __name__ == "__main__":
             encryptedtext = lines[1]
             counter = 0
             encryptedtextbytes = BitArray(encryptedtext)
-            print(encryptedtextbytes.length)
             for i in range(0, int(encryptedtextbytes.length/64)):
                 fragment64 = encryptedtextbytes[i*64:((i*64)+64)]
+                # print(fragment64.bin)
                 decryptedtext += decrypt(fragment64, key)
             print("odszyfrowany tekst:")
             print(decryptedtext)
