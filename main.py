@@ -201,59 +201,54 @@ if __name__ == "__main__":
             for i in range(0, 16):
                 result = feistel(result, keys[i])
             result = final_permutation(result)
-            resultstring = ''
-            for i in range(0, 8):
-                number = result[i*8:(i*8)+8].uint
-                resultstring += chr(number)
-            return resultstring
-        encryptedtext = ''
+            return result
+        encryptedtext = BitArray()
         print('tekst do zaszyfrowania (UTF-8):')
-        plaintext = input()
+        plaintext = input()  # TODO file
         key[0:32] = number_generator.__next__()
         key[32:64] = number_generator.__next__()
         counter = 0
         plaintextbytes = BitArray(64)
         for i in plaintext:
             charcode = ord(i)
-            plaintextbytes.int = charcode << ((7-counter)*8)
+            plaintextbytes.uint += (charcode << ((7-counter)*8))
             counter += 1
             if(counter == 8):
-                encryptedtext += encrypt(plaintextbytes, key)
+                encryptedtext.append(encrypt(plaintextbytes, key))
                 counter = 0
         if(counter != 0):
-            encryptedtext += encrypt(plaintextbytes, key)
+            encryptedtext.append(encrypt(plaintextbytes, key))
         print("klucz: " + str(key.uint))
         print("zaszyfrowany tekst:")
         print(encryptedtext)
+        try:
+            f = open("encrypted.txt", "w")
+            f.write(str(key.uint)+"\n"+"0x"+encryptedtext.hex)
+            f.close()
+            print("pomyslnie zapisano do pliku")
+        except:
+            print("zapisywanie do pliku nie udalo sie!")
+
     else:
         if action == '2':
             def decrypt(encryptedtextbytes, key):
                 keys = generate_keys(key)
-                result = final_permutation(encryptedtextbytes)
+                result = initial_permutation(encryptedtextbytes)
                 for i in range(0, 16):
                     result = feistel(result, keys[15-i])
-                result = initial_permutation(result)
+                result = final_permutation(result)
                 resultstring = ''
                 for i in range(0, 8):
                     resultstring += chr(result[i*8:(i*8)+8].uint)
                 return resultstring
             decryptedtext = ''
-            print('klucz:')
+            f = open("encrypted.txt", "r")
+            lines = f.readlines()
             key = BitArray(64)
-            keystr = input()
-            key.uint = int(keystr)
-            print('tekst do odszyfrowania:')
-            encryptedtext = input()
+            key.uint = int(lines[0])
+            encryptedtext = lines[1]
             counter = 0
-            encryptedtextbytes = BitArray(64)
-            for i in encryptedtext:
-                charcode = ord(i)
-                encryptedtextbytes.uint = charcode << ((7-counter)*8)
-                counter += 1
-                if(counter == 8):
-                    decryptedtext += decrypt(encryptedtextbytes, key)
-                    counter = 0
-            if(counter != 0):
-                decryptedtext += decrypt(encryptedtextbytes, key)
+            encryptedtextbytes = BitArray(encryptedtext)
+            print(encryptedtextbytes)
             print("odszyfrowany tekst:")
             print(decryptedtext)
