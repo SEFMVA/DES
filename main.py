@@ -195,8 +195,7 @@ if __name__ == "__main__":
     action = input()
     key = BitArray(64)
     if action == '1':
-        def encrypt(plaintextbytes, key):
-            keys = generate_keys(key)
+        def encrypt(plaintextbytes, keys):
             result = initial_permutation(plaintextbytes)
             # result = plaintextbytes
             for i in range(0, 16):
@@ -210,10 +209,12 @@ if __name__ == "__main__":
             lines = f.readlines()
             plaintext = "".join(lines)
         except:
-            print('tekst do zaszyfrowania (UTF-8):')
+            print(
+                'Odczyt z plaintext.txt się nie powiódł. Tekst do zaszyfrowania (UTF-8):')
             plaintext = input()
         key[0:32] = number_generator.__next__()
         key[32:64] = number_generator.__next__()
+        keys = generate_keys(key)
         counter = 0
         plaintextbytes = BitArray(64)
         for i in plaintext:
@@ -222,10 +223,10 @@ if __name__ == "__main__":
             # print(plaintextbytes.bin)
             counter += 1
             if(counter == 8):
-                encryptedtext.append(encrypt(plaintextbytes, key))
+                encryptedtext.append(encrypt(plaintextbytes, keys))
                 counter = 0
         if(counter != 0):
-            encryptedtext.append(encrypt(plaintextbytes, key))
+            encryptedtext.append(encrypt(plaintextbytes, keys))
         print("klucz: " + str(key.uint))
         print("zaszyfrowany tekst:")
         print(encryptedtext)
@@ -239,13 +240,12 @@ if __name__ == "__main__":
 
     else:
         if action == '2':
-            def decrypt(encryptedtextbytes, key):
-                keys = generate_keys(key)
-                result = final_permutation(encryptedtextbytes)
+            def decrypt(encryptedtextbytes, keys):
+                result = initial_permutation(encryptedtextbytes)
                 # result = encryptedtextbytes
                 for i in range(0, 16):
                     result = feistel(result, keys[15-i])
-                result = initial_permutation(result)
+                result = final_permutation(result)
                 resultstring = ''
                 for i in range(0, 8):
                     resultstring += chr(result[i*8:(i*8)+8].uint)
@@ -255,12 +255,13 @@ if __name__ == "__main__":
             lines = f.readlines()
             key = BitArray(64)
             key.uint = int(lines[0])
+            keys = generate_keys(key)
             encryptedtext = lines[1]
             counter = 0
             encryptedtextbytes = BitArray(encryptedtext)
             for i in range(0, int(encryptedtextbytes.length/64)):
                 fragment64 = encryptedtextbytes[i*64:((i*64)+64)]
                 # print(fragment64.bin)
-                decryptedtext += decrypt(fragment64, key)
+                decryptedtext += decrypt(fragment64, keys)
             print("odszyfrowany tekst:")
             print(decryptedtext)
