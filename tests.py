@@ -1,0 +1,13 @@
+from main import feistel, generate_keys
+from bitstring import BitArray, BitStream
+
+# print(feistel(BitArray('0b1100110000000000110011001111111111110000101010101111000010101010'),
+#               BitArray('0b000110110000001011101111111111000111000001110010')).bin)
+
+# keys = generate_keys(
+#     BitArray('0b0001001100110100010101110111100110011011101111001101111111110001'))
+# result = feistel(BitArray('0b1100110000000000110011001111111111110000101010101111000010101010'),
+#                  BitArray('0b000110110000001011101111111111000111000001110010'))
+# for i in range(1, 15):
+#     result = feistel(result, keys[i])
+# print(result.bin)

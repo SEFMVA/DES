@@ -63,12 +63,12 @@ def f_fun(R0, key):
         sbox = sboxes[i]
         index = i*6
         sbox_input = xor[index:index+6]
-        row = BitArray(3)
-        row[1] = sbox_input[0]
-        row[2] = sbox_input[5]
-        column = BitArray(5)
-        column[1:5] = sbox_input[1:5]
-        sboxoutput = BitStream(int=sbox[row.int][column.int], length=5)
+        row = BitArray(2)
+        row[0] = sbox_input[0]
+        row[1] = sbox_input[5]
+        column = BitArray(4)
+        column[0:4] = sbox_input[1:5]
+        sboxoutput = BitStream(int=sbox[row.uint][column.uint], length=5)
         index2 = i*4
         sboxesoutput[index2:index2+4] = sboxoutput[1:5]
     P = [16, 7, 20, 21, 29, 12, 28, 17,
@@ -87,7 +87,8 @@ def feistel(byteArray64, key48):
     result = BitArray(64)
     L = byteArray64[0:32]
     R = byteArray64[32:64]
-    xor = L ^ f_fun(R, key48)
+    f = f_fun(R, key48)
+    xor = L ^ f
     result[0:32] = R
     result[32:64] = xor
     return result
@@ -111,6 +112,10 @@ def initial_permutation(x):
 
 
 def final_permutation(z):
+    L = z[0:32]
+    R = z[32:64]
+    z[0:32] = R
+    z[32:64] = L
     order = [40, 8, 48, 16, 56, 24, 64, 32,
              39, 7, 47, 15, 55, 23, 63, 31,
              38, 6, 46, 14, 54, 22, 62, 30,
@@ -196,8 +201,8 @@ if __name__ == "__main__":
     key = BitArray(64)
     if action == '1':
         def encrypt(plaintextbytes, keys):
+            # print(keys)
             result = initial_permutation(plaintextbytes)
-            # result = plaintextbytes
             for i in range(0, 16):
                 result = feistel(result, keys[i])
             result = final_permutation(result)
@@ -241,8 +246,8 @@ if __name__ == "__main__":
     else:
         if action == '2':
             def decrypt(encryptedtextbytes, keys):
+                # print(keys)
                 result = initial_permutation(encryptedtextbytes)
-                # result = encryptedtextbytes
                 for i in range(0, 16):
                     result = feistel(result, keys[15-i])
                 result = final_permutation(result)
