@@ -202,6 +202,7 @@ if __name__ == "__main__":
     if action == '1':
         def encrypt(plaintextbytes, keys):
             # print(keys)
+            # print(plaintextbytes.bin)
             result = initial_permutation(plaintextbytes)
             for i in range(0, 16):
                 result = feistel(result, keys[i])
@@ -230,6 +231,7 @@ if __name__ == "__main__":
             if(counter == 8):
                 encryptedtext.append(encrypt(plaintextbytes, keys))
                 counter = 0
+                plaintextbytes.uint = 0
         if(counter != 0):
             encryptedtext.append(encrypt(plaintextbytes, keys))
         print("klucz: " + str(key.uint))
@@ -251,6 +253,7 @@ if __name__ == "__main__":
                 for i in range(0, 16):
                     result = feistel(result, keys[15-i])
                 result = final_permutation(result)
+                # print(result.bin)
                 resultstring = ''
                 for i in range(0, 8):
                     resultstring += chr(result[i*8:(i*8)+8].uint)
@@ -266,7 +269,6 @@ if __name__ == "__main__":
             encryptedtextbytes = BitArray(encryptedtext)
             for i in range(0, int(encryptedtextbytes.length/64)):
                 fragment64 = encryptedtextbytes[i*64:((i*64)+64)]
-                # print(fragment64.bin)
                 decryptedtext += decrypt(fragment64, keys)
             print("odszyfrowany tekst:")
             print(decryptedtext)
