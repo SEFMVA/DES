@@ -6,7 +6,7 @@ def get_image():
     for i in range(2):
         return_value, image = camera.read()
         try:
-            cv2.imwrite('tests/img' + str(i) + '.png', image)
+            cv2.imwrite('images/img' + str(i) + '.png', image)
         except:
             print("Błąd komery")
             del camera
